@@ -1,3 +1,5 @@
+#include "SFML/Graphics.hpp"
+
 #include <algorithm>
 #include <stdlib.h>
 #include <time.h>
@@ -70,6 +72,17 @@ public:
         }
 
         std::cout << c << " mines places out of " << this->mines << std::endl;
+    }
+
+    void* draw(sf::RenderWindow *window)
+    {
+        sf::RectangleShape closed_cell(sf::Vector2f(32f, 32f));
+        closed_cell.setFillColor(sf::Color(140, 140, 140));
+
+        for (int i = 0; i < width * height; i++)
+        {
+            
+        }
     }
 
 private:
