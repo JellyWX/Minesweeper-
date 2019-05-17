@@ -1,10 +1,10 @@
 #include "main.h"
 
-#define SLEEP_TIME 50000
+#define IDLE_FPS 20
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 #define FPS_COUNTER_SIZE 16
-#define TARGET_FPS 120
+#define TARGET_FPS 80
 
 
 int main(int argc, char** argv)
@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 
     sf::Clock clock;
 
-    bool focused = true;
+    Grid grid(10, 10, 10);
 
     while (window.isOpen())
     {
@@ -43,29 +43,22 @@ int main(int argc, char** argv)
                 case sf::Event::Resized:
                     resize_window(&window, event.size.width, event.size.height);
                     break;
-
-                case sf::Event::LostFocus:
-                    focused = false;
-                    break;
-
-                case sf::Event::GainedFocus:
-                    focused = true;
-                    break;
             }
         }
 
+        window.clear(sf::Color::Black);
+
+        show_fps(&window, &clock, &fps_counter);
+
         // if the window isnt focused, tell the program to slow down a little
-        if (!focused)
+        // otherwise, cap framerate at the target FPS
+        if (!window.hasFocus())
         {
-            usleep(SLEEP_TIME);
+            usleep(((1.0 / IDLE_FPS) * 1000 - clock.getElapsedTime().asMilliseconds()) * 1000);
         }
         else
         {
-            window.clear(sf::Color::Black);
-
             usleep(((1.0 / TARGET_FPS) * 1000 - clock.getElapsedTime().asMilliseconds()) * 1000);
-
-            show_fps(&window, &clock, &fps_counter);
         }
 
         window.display();

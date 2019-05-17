@@ -1,4 +1,7 @@
 #include "SFML/Graphics.hpp"
+
+#include "grid.cpp"
+
 #include <iostream>
 #include <sstream>
 #include <string>
