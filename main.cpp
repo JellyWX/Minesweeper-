@@ -11,7 +11,7 @@ int main(int argc, char** argv)
 {
     auto textures = load_textures();
 
-    sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "SFML Test");
+    sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Minesweeper++");
 
     // event buffer
     sf::Event event;
@@ -24,9 +24,13 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    sf::Text fps_counter;
-    fps_counter.setFont(font);
-    fps_counter.setCharacterSize(FPS_COUNTER_SIZE);
+    #ifndef NDEBUG
+        sf::Text fps_counter;
+        fps_counter.setFont(font);
+        fps_counter.setCharacterSize(FPS_COUNTER_SIZE);
+    #else
+        std::cout << "Release" << std::endl;
+    #endif
 
     sf::Clock clock;
 
@@ -45,14 +49,26 @@ int main(int argc, char** argv)
                 case sf::Event::Resized:
                     resize_window(&window, event.size.width, event.size.height);
                     break;
+
+                case sf::Event::MouseMoved:
+                    //manage_move();
+                    break;
+
+                case sf::Event::MouseButtonReleased:
+                    //manage_click();
+                    break;
             }
         }
 
         window.clear(sf::Color::Black);
 
-        show_fps(&window, &clock, &fps_counter);
-
         grid.draw(&window);
+
+        #ifndef NDEBUG
+            show_fps(&window, &clock, &fps_counter);
+        #endif
+
+        clock.restart();
 
         // if the window isnt focused, tell the program to slow down a little
         // otherwise, cap framerate at the target FPS
@@ -89,7 +105,10 @@ std::unordered_map<std::string, sf::Texture> load_textures()
             sf::Texture t;
             if (t.loadFromFile("../images/" + name))
             {
-                // add ptr to texture object to the texture map
+                #ifndef NDEBUG
+                    std::cout << "Loaded file " << name << " successfully" << std::endl;
+                #endif
+
                 map[name.substr(0, name.length() - 4)] = t;
             }
         }
@@ -99,18 +118,18 @@ std::unordered_map<std::string, sf::Texture> load_textures()
     return map;
 }
 
+#ifndef NDEBUG
 void* show_fps(sf::RenderWindow *window, sf::Clock *clock, sf::Text *location)
 {
     int fps = 1 / ( clock->getElapsedTime().asMicroseconds() / 1000000.0 );
 
     location->setString(std::to_string(fps));
 
-    clock->restart();
-
     window->draw(*location);
 
     return 0;
 }
+#endif
 
 void* resize_window(sf::RenderWindow *window, int width, int height)
 {

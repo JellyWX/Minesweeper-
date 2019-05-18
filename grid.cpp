@@ -6,6 +6,7 @@
 #include <vector>
 #include <iostream>
 
+#define SPRITE_SIZE 32.0
 
 bool reverse_compare(int i, int j)
 {
@@ -17,6 +18,7 @@ class Cell {
 public:
     bool mine = false;
     bool open = false;
+    bool hovered = false;
     int surrounding = 0;
 
     Cell(auto textures)
@@ -28,13 +30,20 @@ public:
 
         sf::Vector2u scale = tex->getSize();
 
-        sprite.setScale(32.f / scale.x, 32.f / scale.y);
+        sprite.setScale(SPRITE_SIZE / scale.x, SPRITE_SIZE / scale.y);
 
         this->sprite = sprite;
     }
 
     sf::Sprite* get_sprite()
     {
+        if (this->hovered)
+        {
+            sf::Sprite s = this->sprite;
+
+            s.setColor(sf::Color(255, 180, 180));
+        }
+
         return &this->sprite;
     }
 
@@ -102,7 +111,7 @@ public:
             Cell cell = this->grid[i];
             sf::Sprite* sprite = cell.get_sprite();
 
-            sprite->setPosition(col * 32, row * 32);
+            sprite->setPosition(col * SPRITE_SIZE, row * SPRITE_SIZE);
 
             window->draw(*sprite);
         }
