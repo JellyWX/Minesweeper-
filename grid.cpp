@@ -39,9 +39,15 @@ public:
     {
         if (this->hovered)
         {
-            sf::Sprite s = this->sprite;
-
-            s.setColor(sf::Color(255, 180, 180));
+            this->sprite.setColor(sf::Color(255, 180, 180));
+        }
+        else if (this->open)
+        {
+            this->sprite.setColor(sf::Color(50, 50, 50));
+        }
+        else
+        {
+            this->sprite.setColor(sf::Color(255, 255, 255));
         }
 
         return &this->sprite;
@@ -117,11 +123,31 @@ public:
         }
     }
 
+    void* set_hovered(int x, int y)
+    {
+        for (int i = 0; i < this->total_cells; i++)
+        {
+            int col = (i % this->width) * SPRITE_SIZE;
+            int row = (i / this->width) * SPRITE_SIZE;
+
+            if (col < x && (col + SPRITE_SIZE) > x && row < y && (row + SPRITE_SIZE) > y)
+            {
+                this->grid[i].hovered = true;
+                this->hovered = i;
+            }
+            else
+            {
+                this->grid[i].hovered = false;
+            }
+        }
+    }
+
 private:
     int width;
     int height;
     int mines;
     int total_cells;
+    int hovered;
 
     std::vector<Cell> grid;
 };

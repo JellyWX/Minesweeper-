@@ -51,7 +51,7 @@ int main(int argc, char** argv)
                     break;
 
                 case sf::Event::MouseMoved:
-                    //manage_move();
+                    manage_move(event.mouseMove.x, event.mouseMove.y, &grid);
                     break;
 
                 case sf::Event::MouseButtonReleased:
@@ -135,4 +135,9 @@ void* resize_window(sf::RenderWindow *window, int width, int height)
 {
     sf::FloatRect visibleArea(0.f, 0.f, width, height);
     window->setView(sf::View(visibleArea));
+}
+
+void* manage_move(int x, int y, Grid* grid)
+{
+    grid->set_hovered(x, y);
 }
