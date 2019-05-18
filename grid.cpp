@@ -42,7 +42,7 @@ private:
 
 class Grid {
 public:
-    Grid(int width, int height, int mines)
+    Grid(int width, int height, int mines, auto textures)
     {
         srand( time(NULL) );
 

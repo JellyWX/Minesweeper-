@@ -9,7 +9,7 @@
 
 int main(int argc, char** argv)
 {
-    load_textures();
+    auto textures = load_textures();
 
     sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "SFML Test");
 
@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 
     sf::Clock clock;
 
-    Grid grid(10, 10, 10);
+    Grid grid(10, 10, 10, textures);
 
     while (window.isOpen())
     {
@@ -67,9 +67,10 @@ int main(int argc, char** argv)
     }
 }
 
-std::unordered_map<std::string, sf::Texture> load_textures()
+
+std::unordered_map<std::string, sf::Texture*> load_textures()
 {
-    std::unordered_map<std::string, sf::Texture> map;
+    std::unordered_map<std::string, sf::Texture*> map;
 
     struct dirent *drnt;
 
@@ -78,7 +79,18 @@ std::unordered_map<std::string, sf::Texture> load_textures()
     drnt = readdir(dr);
 
     while (drnt != 0) {
-        std::cout << drnt->d_name << std::endl;
+        std::string name = drnt->d_name;
+
+        // name longer than 4 and ending in .png
+        if (name.length() > 4 && (name.substr(name.length() - 4) == ".png"))
+        {
+            sf::Texture t;
+            if (t.loadFromFile("../images/" + name))
+            {
+                // add ptr to texture object to the texture map
+                map[name.substr(0, name.length() - 4)] = &t;
+            }
+        }
         drnt = readdir(dr);
     }
 
