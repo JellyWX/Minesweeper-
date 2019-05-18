@@ -1,9 +1,6 @@
-#Change this if you need to target a specific CMake version
-cmake_minimum_required(VERSION 2.6)
-
+cmake_minimum_required(VERSION 3.1)
 
 # Enable debug symbols by default
-# must be done before project() statement
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build (Debug or Release)" FORCE)
 endif()

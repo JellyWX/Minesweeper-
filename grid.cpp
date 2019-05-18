@@ -12,10 +12,31 @@ bool reverse_compare(int i, int j)
     return i > j;
 }
 
-struct Cell {
+
+class Cell {
+public:
     bool mine = false;
     bool open = false;
     int surrounding = 0;
+
+    Cell()
+    {
+        sf::Sprite sprite;
+
+        this->sprite = sprite;
+    }
+
+    sf::Drawable* draw()
+    {
+        if (!this->open)
+        {
+
+            return &this->sprite;
+        }
+    }
+
+private:
+    sf::Sprite sprite;
 };
 
 
@@ -25,7 +46,9 @@ public:
     {
         srand( time(NULL) );
 
-        if (width * height < mines)
+        this->total_cells = width * height;
+
+        if (this->total_cells < mines - 9)
         {
             exit(-1);
         }
@@ -34,17 +57,16 @@ public:
         this->height = height;
         this->mines = mines;
 
-        this->place_mines();
+        this->make_cells();
+        this->count_mines();
     }
 
-    void* place_mines()
+    void* make_cells()
     {
-        int total_cells = width * height;
-
         std::vector<int> mine_positions;
         for (int m = 0; m < this->mines; m++)
         {
-            mine_positions.push_back(rand() % (total_cells - m));
+            mine_positions.push_back(rand() % (this->total_cells - m));
         }
 
         std::sort(mine_positions.begin(), mine_positions.end(), reverse_compare);
@@ -54,32 +76,21 @@ public:
             Cell cell;
             if (mine_positions.back() <= i && (!mine_positions.empty()))
             {
-                std::cout << mine_positions.back() << std::endl;
                 cell.mine = true;
                 mine_positions.pop_back();
             }
             this->grid.push_back(cell);
         }
+    }
 
-        int c = 0;
-
-        for (int i = 0; i < total_cells; i++)
-        {
-            if (grid[i].mine)
-            {
-                c ++;
-            }
-        }
-
-        std::cout << c << " mines places out of " << this->mines << std::endl;
+    void* count_mines()
+    {
+        // TODO
     }
 
     void* draw(sf::RenderWindow *window)
     {
-        sf::RectangleShape closed_cell(sf::Vector2f(32f, 32f));
-        closed_cell.setFillColor(sf::Color(140, 140, 140));
-
-        for (int i = 0; i < width * height; i++)
+        for (int i = 0; i < this->total_cells; i++)
         {
             
         }
@@ -89,6 +100,7 @@ private:
     int width;
     int height;
     int mines;
+    int total_cells;
 
     std::vector<Cell> grid;
 };

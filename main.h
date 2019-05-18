@@ -2,14 +2,18 @@
 
 #include "grid.cpp"
 
+#include <unordered_map>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <unistd.h>
 #include <vector>
+#include <dirent.h>
 
 
 int main(int argc, char** argv);
+
+std::unordered_map<std::string, sf::Texture> load_textures();
 
 void* show_fps(sf::RenderWindow *window, sf::Clock *clock, sf::Text *location);
 

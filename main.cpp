@@ -1,14 +1,16 @@
 #include "main.h"
 
-#define IDLE_FPS 20
+#define IDLE_FPS 5
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 #define FPS_COUNTER_SIZE 16
-#define TARGET_FPS 80
+#define TARGET_FPS 30
 
 
 int main(int argc, char** argv)
 {
+    load_textures();
+
     sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "SFML Test");
 
     // event buffer
@@ -63,6 +65,24 @@ int main(int argc, char** argv)
 
         window.display();
     }
+}
+
+std::unordered_map<std::string, sf::Texture> load_textures()
+{
+    std::unordered_map<std::string, sf::Texture> map;
+
+    struct dirent *drnt;
+
+    DIR *dr;
+    dr = opendir("../images/");
+    drnt = readdir(dr);
+
+    while (drnt != 0) {
+        std::cout << drnt->d_name << std::endl;
+        drnt = readdir(dr);
+    }
+
+    return map;
 }
 
 void* show_fps(sf::RenderWindow *window, sf::Clock *clock, sf::Text *location)
