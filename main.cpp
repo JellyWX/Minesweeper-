@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 
     sf::Clock clock;
 
-    Grid grid(10, 10, 10, textures);
+    Grid grid(10, 10, 10, &textures);
 
     while (window.isOpen())
     {
@@ -52,6 +52,8 @@ int main(int argc, char** argv)
 
         show_fps(&window, &clock, &fps_counter);
 
+        grid.draw(&window);
+
         // if the window isnt focused, tell the program to slow down a little
         // otherwise, cap framerate at the target FPS
         if (!window.hasFocus())
@@ -68,9 +70,9 @@ int main(int argc, char** argv)
 }
 
 
-std::unordered_map<std::string, sf::Texture*> load_textures()
+std::unordered_map<std::string, sf::Texture> load_textures()
 {
-    std::unordered_map<std::string, sf::Texture*> map;
+    std::unordered_map<std::string, sf::Texture> map;
 
     struct dirent *drnt;
 
@@ -88,7 +90,7 @@ std::unordered_map<std::string, sf::Texture*> load_textures()
             if (t.loadFromFile("../images/" + name))
             {
                 // add ptr to texture object to the texture map
-                map[name.substr(0, name.length() - 4)] = &t;
+                map[name.substr(0, name.length() - 4)] = t;
             }
         }
         drnt = readdir(dr);
