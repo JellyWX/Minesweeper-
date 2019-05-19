@@ -129,7 +129,32 @@ public:
 
     void* count_mines()
     {
-        // TODO
+        for (int i = 0; i < this->total_cells; i++)
+        {
+            Cell cell = this->grid[i];
+
+            if (cell.mine)
+            {
+                int col = i % this->width;
+                int row = i / this->width;
+
+                for (int r = -1; r < 2; r++)
+                {
+                    for (int c = -1; c < 2; c++)
+                    {
+                        if (col + c < 0 || row + r < 0 || col + c >= this->width || row + r >= this->height)
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            Cell* surrounding = &this->grid[i + c + this->width * r];
+                            surrounding->surrounding ++;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     void* draw(sf::RenderWindow *window)

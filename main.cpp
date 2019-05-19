@@ -24,17 +24,16 @@ int main(int argc, char** argv)
         return -1;
     }
 
+    // enable FPS counter in debug mode
     #ifndef NDEBUG
         sf::Text fps_counter;
         fps_counter.setFont(font);
         fps_counter.setCharacterSize(FPS_COUNTER_SIZE);
-    #else
-        std::cout << "Release" << std::endl;
     #endif
 
     sf::Clock clock;
 
-    Grid grid(10, 10, 10, &textures);
+    Grid grid(10, 14, 40, &textures);
 
     while (window.isOpen())
     {
