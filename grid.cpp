@@ -5,6 +5,7 @@
 #include <time.h>
 #include <vector>
 #include <iostream>
+#include <unordered_map>
 
 #define SPRITE_SIZE 32.0
 
@@ -35,15 +36,29 @@ public:
         this->sprite = sprite;
     }
 
+    bool open_cell(auto textures)
+    {
+        this->open = true;
+
+        if (this->mine)
+        {
+            sf::Texture* tex = &(*textures)["mine"];
+
+            this->sprite.setTexture(*tex);
+            return false;
+        }
+        else
+        {
+            this->sprite.setTexture((*textures)[std::to_string(this->surrounding)]);
+            return true;
+        }
+    }
+
     sf::Sprite* get_sprite()
     {
-        if (this->hovered)
+        if (this->hovered && !this->open)
         {
             this->sprite.setColor(sf::Color(255, 180, 180));
-        }
-        else if (this->open)
-        {
-            this->sprite.setColor(sf::Color(50, 50, 50));
         }
         else
         {
@@ -55,6 +70,7 @@ public:
 
 private:
     sf::Sprite sprite;
+    sf::Texture* overlay;
 };
 
 
@@ -64,8 +80,17 @@ public:
     {
         srand( time(NULL) );
 
+        this->textures = textures;
         this->total_cells = width * height;
 
+        sf::Texture* tex = &(*textures)["tile"];
+
+        this->bg_sprite.setTexture(*tex);
+        this->bg_sprite.setColor(sf::Color(50, 50, 50));
+        sf::Vector2u scale = tex->getSize();
+
+        this->bg_sprite.setScale(SPRITE_SIZE / scale.x, SPRITE_SIZE / scale.y);
+        
         if (this->total_cells < mines - 9)
         {
             exit(-1);
@@ -119,12 +144,21 @@ public:
 
             sprite->setPosition(col * SPRITE_SIZE, row * SPRITE_SIZE);
 
+            if (cell.open)
+            {
+                this->bg_sprite.setPosition(col * SPRITE_SIZE, row * SPRITE_SIZE);
+
+                window->draw(this->bg_sprite);
+            }
             window->draw(*sprite);
         }
     }
 
     void* set_hovered(int x, int y)
     {
+        this->grid[this->hovered].hovered = false;
+        this->hovered = -1;
+
         for (int i = 0; i < this->total_cells; i++)
         {
             int col = (i % this->width) * SPRITE_SIZE;
@@ -134,11 +168,17 @@ public:
             {
                 this->grid[i].hovered = true;
                 this->hovered = i;
+
+                break;
             }
-            else
-            {
-                this->grid[i].hovered = false;
-            }
+        }
+    }
+
+    void* open_cell()
+    {
+        if (this->hovered >= 0)
+        {
+            this->grid[this->hovered].open_cell(this->textures);
         }
     }
 
@@ -147,7 +187,11 @@ private:
     int height;
     int mines;
     int total_cells;
-    int hovered;
+    int hovered = 0;
+
+    sf::Sprite bg_sprite;
+
+    std::unordered_map<std::string, sf::Texture>* textures;
 
     std::vector<Cell> grid;
 };

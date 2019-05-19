@@ -55,7 +55,7 @@ int main(int argc, char** argv)
                     break;
 
                 case sf::Event::MouseButtonReleased:
-                    //manage_click();
+                    manage_click(event.mouseButton.button, &grid);
                     break;
             }
         }
@@ -140,4 +140,12 @@ void* resize_window(sf::RenderWindow *window, int width, int height)
 void* manage_move(int x, int y, Grid* grid)
 {
     grid->set_hovered(x, y);
+}
+
+void* manage_click(sf::Mouse::Button button, Grid* grid)
+{
+    if (button == sf::Mouse::Left)
+    {
+        grid->open_cell();
+    }
 }
