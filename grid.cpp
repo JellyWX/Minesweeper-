@@ -26,7 +26,7 @@ public:
     {
         sf::Sprite sprite;
 
-        sf::Texture* tex = &(*textures)["tile"];
+        sf::Texture* tex = (*textures)["tile"];
         sprite.setTexture(*tex);
 
         sf::Vector2u scale = tex->getSize();
@@ -42,14 +42,14 @@ public:
 
         if (this->mine)
         {
-            sf::Texture* tex = &(*textures)["mine"];
+            sf::Texture* tex = (*textures)["mine"];
 
             this->sprite.setTexture(*tex);
             return false;
         }
         else
         {
-            this->sprite.setTexture((*textures)[std::to_string(this->surrounding)]);
+            this->sprite.setTexture(*(*textures)[std::to_string(this->surrounding)]);
             return true;
         }
     }
@@ -83,7 +83,7 @@ public:
         this->textures = textures;
         this->total_cells = width * height;
 
-        sf::Texture* tex = &(*textures)["tile"];
+        sf::Texture* tex = (*textures)["tile"];
 
         this->bg_sprite.setTexture(*tex);
         this->bg_sprite.setColor(sf::Color(50, 50, 50));
@@ -114,10 +114,11 @@ public:
 
         std::sort(mine_positions.begin(), mine_positions.end(), reverse_compare);
 
-        for (int i = 0; i < total_cells; i++)
+        for (int i = 0; i < this->total_cells; i++)
         {
             // textures is already a pointer so just copy it
             Cell cell(textures);
+
             if (mine_positions.back() <= i && (!mine_positions.empty()))
             {
                 cell.mine = true;
@@ -149,7 +150,7 @@ public:
                         else
                         {
                             Cell* surrounding = &this->grid[i + c + this->width * r];
-                            surrounding->surrounding ++;
+                            surrounding->surrounding++;
                         }
                     }
                 }
@@ -199,11 +200,42 @@ public:
         }
     }
 
-    void* open_cell()
+    void* open_cell(int i)
+    {
+        Cell* c = &this->grid[i];
+        c->open_cell(this->textures);
+
+        int col = i % this->width;
+        int row = i / this->width;
+
+        if (c->surrounding == 0)
+        {
+            for (int r = -1; r < 2; r++)
+            {
+                for (int c = -1; c < 2; c++)
+                {
+                    if (col + c < 0 || row + r < 0 || col + c >= this->width || row + r >= this->height || (c == 0 && r == 0))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        Cell* surround = &this->grid[i + c + this->width * r];
+                        if (!surround->open)
+                        {
+                            this->open_cell(i + c + this->width * r);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    void* open_click()
     {
         if (this->hovered >= 0)
         {
-            this->grid[this->hovered].open_cell(this->textures);
+            this->open_cell(this->hovered);
         }
     }
 
@@ -216,7 +248,7 @@ private:
 
     sf::Sprite bg_sprite;
 
-    std::unordered_map<std::string, sf::Texture>* textures;
+    std::unordered_map<std::string, sf::Texture*>* textures;
 
     std::vector<Cell> grid;
 };

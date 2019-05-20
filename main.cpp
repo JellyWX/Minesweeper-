@@ -4,7 +4,7 @@
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 #define FPS_COUNTER_SIZE 16
-#define TARGET_FPS 30
+#define TARGET_FPS 40
 
 
 int main(int argc, char** argv)
@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 
     sf::Clock clock;
 
-    Grid grid(10, 14, 40, &textures);
+    Grid grid(10, 14, 10, &textures);
 
     while (window.isOpen())
     {
@@ -85,9 +85,9 @@ int main(int argc, char** argv)
 }
 
 
-std::unordered_map<std::string, sf::Texture> load_textures()
+std::unordered_map<std::string, sf::Texture*> load_textures()
 {
-    std::unordered_map<std::string, sf::Texture> map;
+    std::unordered_map<std::string, sf::Texture*> map;
 
     struct dirent *drnt;
 
@@ -101,8 +101,8 @@ std::unordered_map<std::string, sf::Texture> load_textures()
         // name longer than 4 and ending in .png
         if (name.length() > 4 && (name.substr(name.length() - 4) == ".png"))
         {
-            sf::Texture t;
-            if (t.loadFromFile("../images/" + name))
+            sf::Texture* t = new sf::Texture;
+            if (t->loadFromFile("../images/" + name))
             {
                 #ifndef NDEBUG
                     std::cout << "Loaded file " << name << " successfully" << std::endl;
@@ -145,6 +145,6 @@ void* manage_click(sf::Mouse::Button button, Grid* grid)
 {
     if (button == sf::Mouse::Left)
     {
-        grid->open_cell();
+        grid->open_click();
     }
 }
