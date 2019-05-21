@@ -5,6 +5,7 @@
 #define SCREEN_HEIGHT 480
 #define FPS_COUNTER_SIZE 16
 #define TARGET_FPS 40
+#define FPS_CHECK_INTERVAL 15
 
 
 int main(int argc, char** argv)
@@ -31,9 +32,12 @@ int main(int argc, char** argv)
         fps_counter.setCharacterSize(FPS_COUNTER_SIZE);
     #endif
 
-    sf::Clock clock;
+    sf::Clock frame_clock;
+    sf::Clock lifetime_clock;
 
-    Grid grid(10, 14, 10, &textures);
+    Grid grid(40, 40, 1, &textures);
+
+    long current_frame = 0;
 
     while (window.isOpen())
     {
@@ -59,25 +63,35 @@ int main(int argc, char** argv)
             }
         }
 
+        current_frame ++;
+
         window.clear(sf::Color::Black);
 
-        grid.draw(&window);
+        grid.draw_to(&window);
 
         #ifndef NDEBUG
-            show_fps(&window, &clock, &fps_counter);
+            show_fps(&window, &frame_clock, &fps_counter);
         #endif
 
-        clock.restart();
+        frame_clock.restart();
+
+        if (lifetime_clock.getElapsedTime().asSeconds() > FPS_CHECK_INTERVAL)
+        {
+            std::cout << "Average " << FPS_CHECK_INTERVAL << " second FPS: " << current_frame / lifetime_clock.getElapsedTime().asSeconds() << std::endl;
+
+            lifetime_clock.restart();
+            current_frame = 0;
+        }
 
         // if the window isnt focused, tell the program to slow down a little
         // otherwise, cap framerate at the target FPS
         if (!window.hasFocus())
         {
-            usleep(((1.0 / IDLE_FPS) * 1000 - clock.getElapsedTime().asMilliseconds()) * 1000);
+            usleep(((1.0 / IDLE_FPS) * 1000 - frame_clock.getElapsedTime().asMilliseconds()) * 1000);
         }
         else
         {
-            usleep(((1.0 / TARGET_FPS) * 1000 - clock.getElapsedTime().asMilliseconds()) * 1000);
+            usleep(((1.0 / TARGET_FPS) * 1000 - frame_clock.getElapsedTime().asMilliseconds()) * 1000);
         }
 
         window.display();

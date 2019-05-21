@@ -158,7 +158,7 @@ public:
         }
     }
 
-    void* draw(sf::RenderWindow *window)
+    void* draw_to(sf::RenderWindow *window)
     {
         for (int i = 0; i < this->total_cells; i++)
         {
@@ -185,19 +185,11 @@ public:
         this->grid[this->hovered].hovered = false;
         this->hovered = -1;
 
-        for (int i = 0; i < this->total_cells; i++)
-        {
-            int col = (i % this->width) * SPRITE_SIZE;
-            int row = (i / this->width) * SPRITE_SIZE;
+        int col = x / SPRITE_SIZE;
+        int row = y / SPRITE_SIZE;
 
-            if (col < x && (col + SPRITE_SIZE) > x && row < y && (row + SPRITE_SIZE) > y)
-            {
-                this->grid[i].hovered = true;
-                this->hovered = i;
-
-                break;
-            }
-        }
+        this->hovered = row * this->width + col;
+        this->grid[this->hovered].hovered = true;
     }
 
     void* open_cell(int i)
