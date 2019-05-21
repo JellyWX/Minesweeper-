@@ -35,7 +35,7 @@ int main(int argc, char** argv)
     sf::Clock frame_clock;
     sf::Clock lifetime_clock;
 
-    Grid grid(40, 40, 1, &textures);
+    Grid grid(10, 10, 4, &textures);
 
     long current_frame = 0;
 
@@ -122,6 +122,7 @@ std::unordered_map<std::string, sf::Texture*> load_textures()
                     std::cout << "Loaded file " << name << " successfully" << std::endl;
                 #endif
 
+                t->setRepeated(true);
                 map[name.substr(0, name.length() - 4)] = t;
             }
         }

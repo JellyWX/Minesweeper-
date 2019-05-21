@@ -6,6 +6,7 @@
 #include <vector>
 #include <iostream>
 #include <unordered_map>
+#include <unistd.h>
 
 #define SPRITE_SIZE 32.0
 
@@ -83,18 +84,26 @@ public:
         this->textures = textures;
         this->total_cells = width * height;
 
-        sf::Texture* tex = (*textures)["tile"];
-
-        this->bg_sprite.setTexture(*tex);
-        this->bg_sprite.setColor(sf::Color(50, 50, 50));
+        sf::Texture* tex = (*textures)["bg_tile"];
         sf::Vector2u scale = tex->getSize();
 
-        this->bg_sprite.setScale(SPRITE_SIZE / scale.x, SPRITE_SIZE / scale.y);
-        
+        #ifndef NDEBUG
+            std::cout << "Detected background cell scale: " << scale.x << " " << scale.y << std::endl;
+        #endif
+
         if (this->total_cells < mines - 9)
         {
             exit(-1);
         }
+
+        this->bg_sprite.setSize(sf::Vector2f(scale.x * this->width, scale.y * this->height));
+        this->bg_sprite.setPosition(0, 0);
+
+        this->bg_sprite.setTexture(tex);
+        this->bg_sprite.setTextureRect(sf::IntRect(0, 0, scale.x * this->width, scale.y * this->height));
+
+        this->bg_sprite.setScale(SPRITE_SIZE / (double)scale.x, SPRITE_SIZE / (double)scale.y);
+
 
         this->width = width;
         this->height = height;
@@ -160,6 +169,8 @@ public:
 
     void* draw_to(sf::RenderWindow *window)
     {
+        window->draw(this->bg_sprite);
+
         for (int i = 0; i < this->total_cells; i++)
         {
             int col = i % this->width;
@@ -170,12 +181,6 @@ public:
 
             sprite->setPosition(col * SPRITE_SIZE, row * SPRITE_SIZE);
 
-            if (cell.open)
-            {
-                this->bg_sprite.setPosition(col * SPRITE_SIZE, row * SPRITE_SIZE);
-
-                window->draw(this->bg_sprite);
-            }
             window->draw(*sprite);
         }
     }
@@ -238,7 +243,7 @@ private:
     int total_cells;
     int hovered = 0;
 
-    sf::Sprite bg_sprite;
+    sf::RectangleShape bg_sprite;
 
     std::unordered_map<std::string, sf::Texture*>* textures;
 
