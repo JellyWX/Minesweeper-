@@ -21,7 +21,7 @@ void* show_fps(sf::RenderWindow *window, sf::Clock *clock, sf::Text *location);
 
 void* resize_window(std::vector<sf::View*> views, int width, int height);
 
-void* manage_move(int x, int y, Grid* grid);
+void* manage_move(sf::RenderWindow* window, sf::Vector2i pos, Grid* grid, sf::View* game_view);
 
 void* manage_click(sf::Mouse::Button button, Grid* grid);
 

@@ -15,6 +15,7 @@ int main(int argc, char** argv)
     sf::View hud(sf::FloatRect(0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT));
     sf::View game(sf::FloatRect(0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT));
 
+    // used to resize all views when screen resized
     std::vector<sf::View*> views;
     views.push_back(&hud);
     views.push_back(&game);
@@ -63,7 +64,7 @@ int main(int argc, char** argv)
                     break;
 
                 case sf::Event::MouseMoved:
-                    manage_move(event.mouseMove.x, event.mouseMove.y, &grid);
+                    manage_move(&window, sf::Vector2i(event.mouseMove.x, event.mouseMove.y), &grid, &game);
                     break;
 
                 case sf::Event::MouseButtonReleased:
@@ -71,7 +72,7 @@ int main(int argc, char** argv)
                     break;
 
                 case sf::Event::MouseWheelScrolled:
-                    zoom_view(&hud, 1);
+                    zoom_view(&game, event.mouseWheelScroll.delta);
                     break;
             }
         }
@@ -80,10 +81,12 @@ int main(int argc, char** argv)
 
         window.clear(sf::Color::Black);
 
+        // switch to draw to game view
         window.setView(game);
 
         grid.draw_to(&window);
 
+        // switch to draw to HUD (static components)
         window.setView(hud);
         #ifndef NDEBUG
             show_fps(&window, &frame_clock, &fps_counter);
@@ -165,9 +168,11 @@ void* resize_window(std::vector<sf::View*> views, int width, int height)
     }
 }
 
-void* manage_move(int x, int y, Grid* grid)
+void* manage_move(sf::RenderWindow* window, sf::Vector2i pos, Grid* grid, sf::View* game_view)
 {
-    grid->set_hovered(x, y);
+    sf::Vector2f world_pos = window->mapPixelToCoords(pos, *game_view);
+
+    grid->set_hovered(world_pos.x, world_pos.y);
 }
 
 void* manage_click(sf::Mouse::Button button, Grid* grid)
@@ -178,8 +183,14 @@ void* manage_click(sf::Mouse::Button button, Grid* grid)
     }
 }
 
-void* zoom_view(sf::View *view, int direction)
+void* zoom_view(sf::View* view, int direction)
 {
-    std::cout << "Scroll attempt" << std::endl;
-    view->zoom(direction);
+    if (direction > 0)
+    {
+        view->zoom(1.2);
+    }
+    else
+    {
+        view->zoom(0.8);
+    }
 }
