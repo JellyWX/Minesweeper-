@@ -12,7 +12,16 @@ int main(int argc, char** argv)
 {
     auto textures = load_textures();
 
+    sf::View hud(sf::FloatRect(0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT));
+    sf::View game(sf::FloatRect(0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT));
+
+    std::vector<sf::View*> views;
+    views.push_back(&hud);
+    views.push_back(&game);
+
     sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Minesweeper++");
+
+    window.setFramerateLimit(TARGET_FPS);
 
     // event buffer
     sf::Event event;
@@ -21,7 +30,7 @@ int main(int argc, char** argv)
     sf::Font font;
     if (!font.loadFromFile("/usr/share/fonts/truetype/ubuntu/UbuntuMono-R.ttf"))
     {
-        std::cout << "Error loading font";
+        std::cout << "Error loading font" << std::endl;
         return -1;
     }
 
@@ -35,7 +44,7 @@ int main(int argc, char** argv)
     sf::Clock frame_clock;
     sf::Clock lifetime_clock;
 
-    Grid grid(10, 10, 4, &textures);
+    Grid grid(40, 40, 80, &textures);
 
     long current_frame = 0;
 
@@ -50,7 +59,7 @@ int main(int argc, char** argv)
                    break;
 
                 case sf::Event::Resized:
-                    resize_window(&window, event.size.width, event.size.height);
+                    resize_window(views, event.size.width, event.size.height);
                     break;
 
                 case sf::Event::MouseMoved:
@@ -60,6 +69,10 @@ int main(int argc, char** argv)
                 case sf::Event::MouseButtonReleased:
                     manage_click(event.mouseButton.button, &grid);
                     break;
+
+                case sf::Event::MouseWheelScrolled:
+                    zoom_view(&hud, 1);
+                    break;
             }
         }
 
@@ -67,8 +80,11 @@ int main(int argc, char** argv)
 
         window.clear(sf::Color::Black);
 
+        window.setView(game);
+
         grid.draw_to(&window);
 
+        window.setView(hud);
         #ifndef NDEBUG
             show_fps(&window, &frame_clock, &fps_counter);
         #endif
@@ -84,14 +100,9 @@ int main(int argc, char** argv)
         }
 
         // if the window isnt focused, tell the program to slow down a little
-        // otherwise, cap framerate at the target FPS
         if (!window.hasFocus())
         {
             usleep(((1.0 / IDLE_FPS) * 1000 - frame_clock.getElapsedTime().asMilliseconds()) * 1000);
-        }
-        else
-        {
-            usleep(((1.0 / TARGET_FPS) * 1000 - frame_clock.getElapsedTime().asMilliseconds()) * 1000);
         }
 
         window.display();
@@ -145,10 +156,13 @@ void* show_fps(sf::RenderWindow *window, sf::Clock *clock, sf::Text *location)
 }
 #endif
 
-void* resize_window(sf::RenderWindow *window, int width, int height)
+void* resize_window(std::vector<sf::View*> views, int width, int height)
 {
-    sf::FloatRect visibleArea(0.f, 0.f, width, height);
-    window->setView(sf::View(visibleArea));
+    for (auto view : views)
+    {
+        sf::FloatRect visibleArea(0.f, 0.f, width, height);
+        view->reset(visibleArea);
+    }
 }
 
 void* manage_move(int x, int y, Grid* grid)
@@ -162,4 +176,10 @@ void* manage_click(sf::Mouse::Button button, Grid* grid)
     {
         grid->open_click();
     }
+}
+
+void* zoom_view(sf::View *view, int direction)
+{
+    std::cout << "Scroll attempt" << std::endl;
+    view->zoom(direction);
 }

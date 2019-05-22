@@ -21,6 +21,7 @@ public:
     bool mine = false;
     bool open = false;
     bool hovered = false;
+    bool flagged = false;
     int surrounding = 0;
 
     Cell(auto textures)
@@ -189,11 +190,18 @@ public:
         this->grid[this->hovered].hovered = false;
         this->hovered = -1;
 
-        int col = x / SPRITE_SIZE;
-        int row = y / SPRITE_SIZE;
+        if (x >= SPRITE_SIZE * this->width || y >= SPRITE_SIZE * this->height)
+        {
 
-        this->hovered = row * this->width + col;
-        this->grid[this->hovered].hovered = true;
+        }
+        else 
+        {
+            int col = x / SPRITE_SIZE;
+            int row = y / SPRITE_SIZE;
+
+            this->hovered = row * this->width + col;
+            this->grid[this->hovered].hovered = true;
+        }
     }
 
     void* open_cell(int i)
