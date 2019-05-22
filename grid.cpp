@@ -71,7 +71,6 @@ public:
 
 private:
     sf::Sprite sprite;
-    sf::Texture* overlay;
 };
 
 
@@ -83,6 +82,10 @@ public:
 
         this->textures = textures;
         this->total_cells = width * height;
+
+        this->width = width;
+        this->height = height;
+        this->mines = mines;
 
         sf::Texture* tex = (*textures)["bg_tile"];
         sf::Vector2u scale = tex->getSize();
@@ -104,10 +107,6 @@ public:
 
         this->bg_sprite.setScale(SPRITE_SIZE / (double)scale.x, SPRITE_SIZE / (double)scale.y);
 
-
-        this->width = width;
-        this->height = height;
-        this->mines = mines;
 
         this->make_cells(textures);
         this->count_mines();
