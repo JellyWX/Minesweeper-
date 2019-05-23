@@ -6,23 +6,24 @@
 #define FPS_COUNTER_SIZE 16
 #define TARGET_FPS 40
 #define FPS_CHECK_INTERVAL 15
+#define ZOOM 0.15
 
 
-int main(int argc, char** argv)
+Minesweeper::Minesweeper() :
+    window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Minesweeper++"),
+    hud(sf::FloatRect(0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT)),
+    game(sf::FloatRect(0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT))
 {
-    auto textures = load_textures();
+    std::cout << "Starting..." << std::endl;
 
-    sf::View hud(sf::FloatRect(0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT));
-    sf::View game(sf::FloatRect(0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT));
+    auto textures = this->load_textures();
 
     // used to resize all views when screen resized
     std::vector<sf::View*> views;
     views.push_back(&hud);
     views.push_back(&game);
 
-    sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Minesweeper++");
-
-    window.setFramerateLimit(TARGET_FPS);
+    this->window.setFramerateLimit(TARGET_FPS);
 
     // event buffer
     sf::Event event;
@@ -32,22 +33,17 @@ int main(int argc, char** argv)
     if (!font.loadFromFile("/usr/share/fonts/truetype/ubuntu/UbuntuMono-R.ttf"))
     {
         std::cout << "Error loading font" << std::endl;
-        return -1;
+        exit(-1);
     }
 
     // enable FPS counter in debug mode
     #ifndef NDEBUG
-        sf::Text fps_counter;
-        fps_counter.setFont(font);
-        fps_counter.setCharacterSize(FPS_COUNTER_SIZE);
+    sf::Text fps_counter;
+    fps_counter.setFont(font);
+    fps_counter.setCharacterSize(FPS_COUNTER_SIZE);
     #endif
 
-    sf::Clock frame_clock;
-    sf::Clock lifetime_clock;
-
     Grid grid(40, 40, 80, &textures);
-
-    long current_frame = 0;
 
     while (window.isOpen())
     {
@@ -89,18 +85,12 @@ int main(int argc, char** argv)
         // switch to draw to HUD (static components)
         window.setView(hud);
         #ifndef NDEBUG
-            show_fps(&window, &frame_clock, &fps_counter);
+        show_fps(&frame_clock, &fps_counter);
         #endif
 
         frame_clock.restart();
 
-        if (lifetime_clock.getElapsedTime().asSeconds() > FPS_CHECK_INTERVAL)
-        {
-            std::cout << "Average " << FPS_CHECK_INTERVAL << " second FPS: " << current_frame / lifetime_clock.getElapsedTime().asSeconds() << std::endl;
-
-            lifetime_clock.restart();
-            current_frame = 0;
-        }
+        check_average_fps();
 
         // if the window isnt focused, tell the program to slow down a little
         if (!window.hasFocus())
@@ -112,8 +102,7 @@ int main(int argc, char** argv)
     }
 }
 
-
-std::unordered_map<std::string, sf::Texture*> load_textures()
+std::unordered_map<std::string, sf::Texture*> Minesweeper::load_textures()
 {
     std::unordered_map<std::string, sf::Texture*> map;
 
@@ -147,19 +136,30 @@ std::unordered_map<std::string, sf::Texture*> load_textures()
 }
 
 #ifndef NDEBUG
-void* show_fps(sf::RenderWindow *window, sf::Clock *clock, sf::Text *location)
+void* Minesweeper::show_fps(sf::Clock *clock, sf::Text *location)
 {
     int fps = 1 / ( clock->getElapsedTime().asMicroseconds() / 1000000.0 );
 
     location->setString(std::to_string(fps));
 
-    window->draw(*location);
+    this->window.draw(*location);
 
     return 0;
 }
 #endif
 
-void* resize_window(std::vector<sf::View*> views, int width, int height)
+void* Minesweeper::check_average_fps()
+{
+    if (this->lifetime_clock.getElapsedTime().asSeconds() > FPS_CHECK_INTERVAL)
+    {
+        std::cout << "Average " << FPS_CHECK_INTERVAL << " second FPS: " << this->current_frame / this->lifetime_clock.getElapsedTime().asSeconds() << std::endl;
+
+        this->lifetime_clock.restart();
+        this->current_frame = 0;
+    }
+}
+
+void* Minesweeper::resize_window(std::vector<sf::View*> views, int width, int height)
 {
     for (auto view : views)
     {
@@ -168,14 +168,14 @@ void* resize_window(std::vector<sf::View*> views, int width, int height)
     }
 }
 
-void* manage_move(sf::RenderWindow* window, sf::Vector2i pos, Grid* grid, sf::View* game_view)
+void* Minesweeper::manage_move(sf::RenderWindow* window, sf::Vector2i pos, Grid* grid, sf::View* game_view)
 {
     sf::Vector2f world_pos = window->mapPixelToCoords(pos, *game_view);
 
     grid->set_hovered(world_pos.x, world_pos.y);
 }
 
-void* manage_click(sf::Mouse::Button button, Grid* grid)
+void* Minesweeper::manage_click(sf::Mouse::Button button, Grid* grid)
 {
     if (button == sf::Mouse::Left)
     {
@@ -183,14 +183,12 @@ void* manage_click(sf::Mouse::Button button, Grid* grid)
     }
 }
 
-void* zoom_view(sf::View* view, int direction)
+void* Minesweeper::zoom_view(sf::View* view, int direction)
 {
-    if (direction > 0)
-    {
-        view->zoom(1.2);
-    }
-    else
-    {
-        view->zoom(0.8);
-    }
+    view->zoom(1 + ZOOM * direction);
+}
+
+int main(int argc, char** argv)
+{
+    Minesweeper* game = new Minesweeper();
 }

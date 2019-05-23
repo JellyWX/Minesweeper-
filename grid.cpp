@@ -173,8 +173,8 @@ public:
 
         for (int i = 0; i < this->total_cells; i++)
         {
-            int col = i % this->width;
-            int row = i / this->width;
+            unsigned short col = i % this->width;
+            unsigned short row = i / this->width;
 
             Cell cell = this->grid[i];
             sf::Sprite* sprite = cell.get_sprite();
@@ -196,8 +196,8 @@ public:
         }
         else 
         {
-            int col = x / SPRITE_SIZE;
-            int row = y / SPRITE_SIZE;
+            unsigned short col = x / SPRITE_SIZE;
+            unsigned short row = y / SPRITE_SIZE;
 
             this->hovered = row * this->width + col;
             this->grid[this->hovered].hovered = true;
