@@ -9,7 +9,7 @@
 #define ZOOM 0.15
 
 
-Minesweeper::Minesweeper() :
+Minesweeper::Minesweeper(unsigned short width, unsigned short height, unsigned short mines) :
     window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Minesweeper++"),
     hud(sf::FloatRect(0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT)),
     game(sf::FloatRect(0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -19,9 +19,8 @@ Minesweeper::Minesweeper() :
     auto textures = this->load_textures();
 
     // used to resize all views when screen resized
-    std::vector<sf::View*> views;
-    views.push_back(&hud);
-    views.push_back(&game);
+    this->views.push_back(&hud);
+    this->views.push_back(&game);
 
     this->window.setFramerateLimit(TARGET_FPS);
 
@@ -43,7 +42,7 @@ Minesweeper::Minesweeper() :
     fps_counter.setCharacterSize(FPS_COUNTER_SIZE);
     #endif
 
-    Grid grid(40, 40, 80, &textures);
+    Grid grid(width, height, mines, &textures);
 
     while (window.isOpen())
     {
@@ -56,7 +55,7 @@ Minesweeper::Minesweeper() :
                    break;
 
                 case sf::Event::Resized:
-                    resize_window(views, event.size.width, event.size.height);
+                    resize_window(event.size.width, event.size.height);
                     break;
 
                 case sf::Event::MouseMoved:
@@ -159,9 +158,9 @@ void* Minesweeper::check_average_fps()
     }
 }
 
-void* Minesweeper::resize_window(std::vector<sf::View*> views, int width, int height)
+void* Minesweeper::resize_window(int width, int height)
 {
-    for (auto view : views)
+    for (auto view : this->views)
     {
         sf::FloatRect visibleArea(0.f, 0.f, width, height);
         view->reset(visibleArea);
@@ -190,5 +189,5 @@ void* Minesweeper::zoom_view(int direction)
 
 int main(int argc, char** argv)
 {
-    Minesweeper* game = new Minesweeper();
+    Minesweeper* game = new Minesweeper(20, 20, 100);
 }

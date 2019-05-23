@@ -110,30 +110,61 @@ public:
 
 
         this->make_cells(textures);
-        this->count_mines();
     }
 
     void* make_cells(auto textures)
     {
-        std::vector<int> mine_positions;
-        for (int m = 0; m < this->mines; m++)
-        {
-            mine_positions.push_back(rand() % (this->total_cells - m));
-        }
-
-        std::sort(mine_positions.begin(), mine_positions.end(), reverse_compare);
-
         for (int i = 0; i < this->total_cells; i++)
         {
             Cell cell(textures);
 
-            if (mine_positions.back() <= i && (!mine_positions.empty()))
-            {
-                cell.mine = true;
-                mine_positions.pop_back();
-            }
             this->grid.push_back(cell);
         }
+    }
+
+    void* add_mines()
+    {
+        std::vector<int> mine_positions;
+        for (int m = 0; m < this->mines; m++)
+        {
+            int mine = rand() % this->total_cells;
+
+            unsigned short col = mine % this->width;
+            unsigned short row = mine / this->width;
+
+            bool valid = true;
+
+            for (int c = -1; c < 2; c++)
+            {
+                for (int r = -1; r < 2; r++)
+                {
+                    if (col + c < 0 || row + r < 0 || col + c >= this->width || row + r >= this->height)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        if (mine + c + this->width * r == this->hovered)
+                        {
+                            valid = false;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!valid || this->grid[mine].mine)
+            {
+                m --;
+                continue;
+            }
+            else
+            {
+                this->grid[mine].mine = true;
+            }
+        }
+
+        this->count_mines();
     }
 
     void* count_mines()
@@ -238,6 +269,12 @@ public:
     {
         if (this->hovered >= 0)
         {
+            if (!this->initialized)
+            {
+                this->add_mines();
+                this->initialized = true;
+            }
+
             this->open_cell(this->hovered);
         }
     }
@@ -248,6 +285,7 @@ private:
     int mines;
     int total_cells;
     int hovered = 0;
+    bool initialized = false;
 
     sf::RectangleShape bg_sprite;
 
