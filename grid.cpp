@@ -92,7 +92,7 @@ public:
         sf::Vector2u scale = tex->getSize();
 
         #ifndef NDEBUG
-            std::cout << "Detected background cell scale: " << scale.x << " " << scale.y << std::endl;
+        std::cout << "Detected background cell scale: " << scale.x << " " << scale.y << std::endl;
         #endif
 
         if (this->total_cells < mines - 9)
@@ -125,7 +125,6 @@ public:
 
         for (int i = 0; i < this->total_cells; i++)
         {
-            // textures is already a pointer so just copy it
             Cell cell(textures);
 
             if (mine_positions.back() <= i && (!mine_positions.empty()))
@@ -145,8 +144,8 @@ public:
 
             if (cell.mine)
             {
-                int col = i % this->width;
-                int row = i / this->width;
+                unsigned short col = i % this->width;
+                unsigned short row = i / this->width;
 
                 for (int r = -1; r < 2; r++)
                 {
@@ -190,7 +189,7 @@ public:
         this->grid[this->hovered].hovered = false;
         this->hovered = -1;
 
-        if (x >= SPRITE_SIZE * this->width || y >= SPRITE_SIZE * this->height)
+        if (x >= SPRITE_SIZE * this->width || y >= SPRITE_SIZE * this->height || x < 0 || y < 0)
         {
 
         }

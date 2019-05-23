@@ -60,7 +60,7 @@ Minesweeper::Minesweeper() :
                     break;
 
                 case sf::Event::MouseMoved:
-                    manage_move(&window, sf::Vector2i(event.mouseMove.x, event.mouseMove.y), &grid, &game);
+                    manage_move(sf::Vector2i(event.mouseMove.x, event.mouseMove.y), &grid, &game);
                     break;
 
                 case sf::Event::MouseButtonReleased:
@@ -68,7 +68,7 @@ Minesweeper::Minesweeper() :
                     break;
 
                 case sf::Event::MouseWheelScrolled:
-                    zoom_view(&game, event.mouseWheelScroll.delta);
+                    zoom_view(event.mouseWheelScroll.delta);
                     break;
             }
         }
@@ -168,9 +168,9 @@ void* Minesweeper::resize_window(std::vector<sf::View*> views, int width, int he
     }
 }
 
-void* Minesweeper::manage_move(sf::RenderWindow* window, sf::Vector2i pos, Grid* grid, sf::View* game_view)
+void* Minesweeper::manage_move(sf::Vector2i pos, Grid* grid, sf::View* game_view)
 {
-    sf::Vector2f world_pos = window->mapPixelToCoords(pos, *game_view);
+    sf::Vector2f world_pos = this->window.mapPixelToCoords(pos, *game_view);
 
     grid->set_hovered(world_pos.x, world_pos.y);
 }
@@ -183,9 +183,9 @@ void* Minesweeper::manage_click(sf::Mouse::Button button, Grid* grid)
     }
 }
 
-void* Minesweeper::zoom_view(sf::View* view, int direction)
+void* Minesweeper::zoom_view(int direction)
 {
-    view->zoom(1 + ZOOM * direction);
+    this->game.zoom(1 + ZOOM * direction);
 }
 
 int main(int argc, char** argv)
