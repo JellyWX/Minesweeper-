@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <vector>
 #include <dirent.h>
+#include <cmath>
 
 
 int main(int argc, char** argv);
@@ -37,6 +38,8 @@ private:
     sf::Clock mouse_down_time;
     bool mouse_down = false;
     bool mouse_held_moved = false;
+    sf::Vector2i mouse_down_position;
+    sf::Vector2i old_mouse_position;
 
     std::unordered_map<std::string, sf::Texture*> load_textures();
 
@@ -54,3 +57,5 @@ private:
 
     void* zoom_view(int direction);
 };
+
+double magnitude(sf::Vector2i);

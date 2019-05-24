@@ -8,6 +8,7 @@
 #define FPS_CHECK_INTERVAL 15
 #define ZOOM 0.15
 #define LONG_HOLD_TIME 250
+#define MOVE_THRESHOLD 24
 
 
 Minesweeper::Minesweeper(unsigned short width, unsigned short height, unsigned short mines) :
@@ -21,7 +22,7 @@ Minesweeper::Minesweeper(unsigned short width, unsigned short height, unsigned s
     this->views.push_back(&hud);
     this->views.push_back(&game);
 
-    this->window.setFramerateLimit(TARGET_FPS);
+//    this->window.setFramerateLimit(TARGET_FPS);
 
     // event buffer
     sf::Event event;
@@ -65,6 +66,8 @@ Minesweeper::Minesweeper(unsigned short width, unsigned short height, unsigned s
                     {
                         this->mouse_down_time.restart();
                         this->mouse_down = true;
+                        this->mouse_down_position = sf::Mouse::getPosition(window);
+                        this->old_mouse_position = sf::Mouse::getPosition(window);
                         this->mouse_held_moved = false;
                     }
                     break;
@@ -176,12 +179,27 @@ void* Minesweeper::resize_window(int width, int height)
 
 void* Minesweeper::manage_move(sf::Vector2i pos, Grid* grid, sf::View* game_view)
 {
+
+    if (!this->mouse_held_moved)
+    {
+        sf::Vector2i movement_abs = this->mouse_down_position - pos;
+    
+        if (magnitude(movement_abs) > MOVE_THRESHOLD)
+        {
+            this->mouse_held_moved = true;
+        }
+    }
+    else if (this->mouse_down)
+    {
+        sf::Vector2i movement = old_mouse_position - pos;
+
+        game_view->move(movement.x, movement.y);
+        this->old_mouse_position = pos;
+    }
+
     sf::Vector2f world_pos = this->window.mapPixelToCoords(pos, *game_view);
 
-    if (grid->set_hovered(world_pos.x, world_pos.y))
-    {
-        this->mouse_held_moved = true;
-    }
+    grid->set_hovered(world_pos.x, world_pos.y);
 }
 
 void* Minesweeper::manage_click(sf::Mouse::Button button, Grid* grid)
@@ -210,4 +228,9 @@ void* Minesweeper::zoom_view(int direction)
 int main(int argc, char** argv)
 {
     Minesweeper* game = new Minesweeper(20, 20, 100);
+}
+
+double magnitude(sf::Vector2i v)
+{
+    return sqrt(pow(v.x, 2) + pow(v.y, 2));
 }
