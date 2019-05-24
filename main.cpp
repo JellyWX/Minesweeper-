@@ -22,7 +22,7 @@ Minesweeper::Minesweeper(unsigned short width, unsigned short height, unsigned s
     this->views.push_back(&hud);
     this->views.push_back(&game);
 
-//    this->window.setFramerateLimit(TARGET_FPS);
+    this->window.setFramerateLimit(TARGET_FPS);
 
     // event buffer
     sf::Event event;
