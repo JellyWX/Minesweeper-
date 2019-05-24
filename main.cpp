@@ -7,6 +7,7 @@
 #define TARGET_FPS 40
 #define FPS_CHECK_INTERVAL 15
 #define ZOOM 0.15
+#define LONG_HOLD_TIME 500
 
 
 Minesweeper::Minesweeper(unsigned short width, unsigned short height, unsigned short mines) :
@@ -14,8 +15,6 @@ Minesweeper::Minesweeper(unsigned short width, unsigned short height, unsigned s
     hud(sf::FloatRect(0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT)),
     game(sf::FloatRect(0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT))
 {
-    std::cout << "Starting..." << std::endl;
-
     auto textures = this->load_textures();
 
     // used to resize all views when screen resized
@@ -42,7 +41,7 @@ Minesweeper::Minesweeper(unsigned short width, unsigned short height, unsigned s
     fps_counter.setCharacterSize(FPS_COUNTER_SIZE);
     #endif
 
-    Grid grid(width, height, mines, &textures);
+    Grid* grid = new Grid(width, height, mines, &textures);
 
     while (window.isOpen())
     {
@@ -59,11 +58,15 @@ Minesweeper::Minesweeper(unsigned short width, unsigned short height, unsigned s
                     break;
 
                 case sf::Event::MouseMoved:
-                    manage_move(sf::Vector2i(event.mouseMove.x, event.mouseMove.y), &grid, &game);
+                    manage_move(sf::Vector2i(event.mouseMove.x, event.mouseMove.y), grid, &game);
+                    break;
+
+                case sf::Event::MouseButtonPressed:
+                    this->mouse_down_time.restart();
                     break;
 
                 case sf::Event::MouseButtonReleased:
-                    manage_click(event.mouseButton.button, &grid);
+                    manage_click(event.mouseButton.button, grid);
                     break;
 
                 case sf::Event::MouseWheelScrolled:
@@ -79,7 +82,7 @@ Minesweeper::Minesweeper(unsigned short width, unsigned short height, unsigned s
         // switch to draw to game view
         window.setView(game);
 
-        grid.draw_to(&window);
+        grid->draw_to(&window);
 
         // switch to draw to HUD (static components)
         window.setView(hud);
@@ -176,9 +179,13 @@ void* Minesweeper::manage_move(sf::Vector2i pos, Grid* grid, sf::View* game_view
 
 void* Minesweeper::manage_click(sf::Mouse::Button button, Grid* grid)
 {
-    if (button == sf::Mouse::Left)
+    if (mouse_down_time.getElapsedTime().asMilliseconds() < LONG_HOLD_TIME && button == sf::Mouse::Left)
     {
         grid->open_click();
+    }
+    else
+    {
+        grid->flag_click();
     }
 }
 

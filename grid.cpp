@@ -56,6 +56,24 @@ public:
         }
     }
 
+    void* flag_cell(auto textures)
+    {
+        this->flagged = !this->flagged;
+
+        if (this->flagged)
+        {
+            sf::Texture* tex = (*textures)["mark"];
+
+            this->sprite.setTexture(*tex);
+        }
+        else
+        {
+            sf::Texture* tex = (*textures)["tile"];
+
+            this->sprite.setTexture(*tex);
+        }
+    }
+
     sf::Sprite* get_sprite()
     {
         if (this->hovered && !this->open)
@@ -220,11 +238,7 @@ public:
         this->grid[this->hovered].hovered = false;
         this->hovered = -1;
 
-        if (x >= SPRITE_SIZE * this->width || y >= SPRITE_SIZE * this->height || x < 0 || y < 0)
-        {
-
-        }
-        else 
+        if (!(x >= SPRITE_SIZE * this->width || y >= SPRITE_SIZE * this->height || x < 0 || y < 0))
         {
             unsigned short col = x / SPRITE_SIZE;
             unsigned short row = y / SPRITE_SIZE;
@@ -237,27 +251,32 @@ public:
     void* open_cell(int i)
     {
         Cell* c = &this->grid[i];
-        c->open_cell(this->textures);
 
-        int col = i % this->width;
-        int row = i / this->width;
-
-        if (c->surrounding == 0)
+        if (!c->flagged)
         {
-            for (int r = -1; r < 2; r++)
+            c->open_cell(this->textures);
+
+            int col = i % this->width;
+            int row = i / this->width;
+
+            if (c->surrounding == 0)
             {
-                for (int c = -1; c < 2; c++)
+                for (int r = -1; r < 2; r++)
                 {
-                    if (col + c < 0 || row + r < 0 || col + c >= this->width || row + r >= this->height || (c == 0 && r == 0))
+                    for (int c = -1; c < 2; c++)
                     {
-                        continue;
-                    }
-                    else
-                    {
-                        Cell* surround = &this->grid[i + c + this->width * r];
-                        if (!surround->open)
+                        if (col + c < 0 || row + r < 0 || col + c >= this->width || row + r >= this->height || (c == 0 && r == 0))
                         {
-                            this->open_cell(i + c + this->width * r);
+                            continue;
+                        }
+                        else
+                        {
+                            Cell* surround = &this->grid[i + c + this->width * r];
+
+                            if (!surround->open)
+                            {
+                                this->open_cell(i + c + this->width * r);
+                            }
                         }
                     }
                 }
@@ -276,6 +295,19 @@ public:
             }
 
             this->open_cell(this->hovered);
+        }
+    }
+
+    void* flag_click()
+    {
+        if (this->hovered >= 0)
+        {
+            Cell* cell = &this->grid[this->hovered];
+
+            if (!cell->open)
+            {
+                cell->flag_cell(this->textures);
+            }
         }
     }
 

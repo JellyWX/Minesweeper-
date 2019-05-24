@@ -34,6 +34,8 @@ private:
     sf::Clock frame_clock; // for managing FPS
     sf::Clock lifetime_clock; // for checking FPS
 
+    sf::Clock mouse_down_time;
+
     std::unordered_map<std::string, sf::Texture*> load_textures();
 
     #ifndef NDEBUG
