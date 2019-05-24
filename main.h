@@ -35,6 +35,8 @@ private:
     sf::Clock lifetime_clock; // for checking FPS
 
     sf::Clock mouse_down_time;
+    bool mouse_down = false;
+    bool mouse_held_moved = false;
 
     std::unordered_map<std::string, sf::Texture*> load_textures();
 

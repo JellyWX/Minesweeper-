@@ -7,7 +7,7 @@
 #define TARGET_FPS 40
 #define FPS_CHECK_INTERVAL 15
 #define ZOOM 0.15
-#define LONG_HOLD_TIME 500
+#define LONG_HOLD_TIME 250
 
 
 Minesweeper::Minesweeper(unsigned short width, unsigned short height, unsigned short mines) :
@@ -62,7 +62,11 @@ Minesweeper::Minesweeper(unsigned short width, unsigned short height, unsigned s
                     break;
 
                 case sf::Event::MouseButtonPressed:
-                    this->mouse_down_time.restart();
+                    {
+                        this->mouse_down_time.restart();
+                        this->mouse_down = true;
+                        this->mouse_held_moved = false;
+                    }
                     break;
 
                 case sf::Event::MouseButtonReleased:
@@ -174,19 +178,28 @@ void* Minesweeper::manage_move(sf::Vector2i pos, Grid* grid, sf::View* game_view
 {
     sf::Vector2f world_pos = this->window.mapPixelToCoords(pos, *game_view);
 
-    grid->set_hovered(world_pos.x, world_pos.y);
+    if (grid->set_hovered(world_pos.x, world_pos.y))
+    {
+        this->mouse_held_moved = true;
+    }
 }
 
 void* Minesweeper::manage_click(sf::Mouse::Button button, Grid* grid)
 {
-    if (mouse_down_time.getElapsedTime().asMilliseconds() < LONG_HOLD_TIME && button == sf::Mouse::Left)
+    if (!this->mouse_held_moved)
     {
-        grid->open_click();
+        if (mouse_down_time.getElapsedTime().asMilliseconds() < LONG_HOLD_TIME && button == sf::Mouse::Left)
+        {
+            grid->open_click();
+        }
+        else
+        {
+            grid->flag_click();
+        }
     }
-    else
-    {
-        grid->flag_click();
-    }
+
+    this->mouse_down = false;
+    this->mouse_down_time.restart();
 }
 
 void* Minesweeper::zoom_view(int direction)

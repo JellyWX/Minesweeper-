@@ -233,9 +233,10 @@ public:
         }
     }
 
-    void* set_hovered(int x, int y)
+    bool set_hovered(int x, int y)
     {
         this->grid[this->hovered].hovered = false;
+        int past_hovered = this->hovered;
         this->hovered = -1;
 
         if (!(x >= SPRITE_SIZE * this->width || y >= SPRITE_SIZE * this->height || x < 0 || y < 0))
@@ -245,6 +246,15 @@ public:
 
             this->hovered = row * this->width + col;
             this->grid[this->hovered].hovered = true;
+        }
+
+        if (this->hovered == past_hovered)
+        {
+            return false;
+        }
+        else 
+        {
+            return true;
         }
     }
 
