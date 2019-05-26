@@ -40,6 +40,11 @@ public:
 
     bool open_cell(auto textures)
     {
+        if (this->open)
+        {
+            return true;
+        }
+
         this->open = true;
 
         if (this->mine)
@@ -258,7 +263,7 @@ public:
         }
     }
 
-    void* open_cell(int i)
+    bool open_cell(int i)
     {
         Cell* c = &this->grid[i];
 
@@ -291,10 +296,12 @@ public:
                     }
                 }
             }
+
+            return c->mine;
         }
     }
 
-    void* open_click()
+    bool open_click()
     {
         if (this->hovered >= 0)
         {
@@ -304,7 +311,7 @@ public:
                 this->initialized = true;
             }
 
-            this->open_cell(this->hovered);
+            return this->open_cell(this->hovered);
         }
     }
 

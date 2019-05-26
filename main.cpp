@@ -208,7 +208,12 @@ void* Minesweeper::manage_click(sf::Mouse::Button button, Grid* grid)
     {
         if (mouse_down_time.getElapsedTime().asMilliseconds() < LONG_HOLD_TIME && button == sf::Mouse::Left)
         {
-            grid->open_click();
+            bool mine = grid->open_click();
+
+            if (mine)
+            {
+                std::cout << "Mine! You lost" << std::endl;
+            }
         }
         else
         {
